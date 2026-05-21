@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
@@ -26,6 +27,9 @@ jobs:
       - name: 运行ADQ模板脚本
         run: python generate_adq_report.py
 
+      - name: 运行已填数据版ADQ脚本
+        run: python generate_filled_adq.py
+
       - name: 上传直播Excel
         uses: actions/upload-artifact@v4
         with:
@@ -38,4 +42,11 @@ jobs:
         with:
           name: ADQ直播数据统计模板
           path: ADQ直播数据统计模板.xlsx
+          retention-days: 30
+
+      - name: 上传已填数据版ADQ Excel
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADQ直播数据统计_已填数据
+          path: ADQ直播数据统计_已填数据.xlsx
           retention-days: 30
