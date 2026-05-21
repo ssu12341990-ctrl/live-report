@@ -20,12 +20,22 @@ jobs:
       - name: 安装依赖
         run: pip install openpyxl
 
-      - name: 运行脚本生成Excel
+      - name: 运行直播报表脚本
         run: python generate_live_report.py
 
-      - name: 上传Excel文件（可下载）
+      - name: 运行ADQ模板脚本
+        run: python generate_adq_report.py
+
+      - name: 上传直播Excel
         uses: actions/upload-artifact@v4
         with:
           name: 直播数据统计_修正版
           path: 直播数据统计_修正版.xlsx
+          retention-days: 30
+
+      - name: 上传ADQ模板Excel
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADQ直播数据统计模板
+          path: ADQ直播数据统计模板.xlsx
           retention-days: 30
