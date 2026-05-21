@@ -27,7 +27,7 @@ ws["A1"].alignment = center
 ws.row_dimensions[1].height = 36
 
 ws.merge_cells("A2:R2")
-ws["A2"] = "⚠️ 修正说明：① 原"场观roi/总ROI"实为转化率，已重命名；② 新增"成交金额"与"真实ROI（成交额/消耗）"列"
+ws["A2"] = "修正说明：① 原[场观roi/总ROI]实为转化率，已重命名；② 新增[成交金额]与[真实ROI(成交额/消耗)]列"
 ws["A2"].font      = Font(bold=True, color="C00000", size=10)
 ws["A2"].fill      = PatternFill("solid", fgColor="FFF2CC")
 ws["A2"].alignment = left
