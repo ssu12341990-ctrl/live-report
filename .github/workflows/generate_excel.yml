@@ -1,0 +1,31 @@
+name: 生成直播数据统计Excel
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: pip install openpyxl
+
+      - name: 运行脚本生成Excel
+        run: python generate_live_report.py
+
+      - name: 上传Excel文件（可下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: 直播数据统计_修正版
+          path: 直播数据统计_修正版.xlsx
+          retention-days: 30
