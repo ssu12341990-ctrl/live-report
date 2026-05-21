@@ -166,22 +166,29 @@ for i, hdr in enumerate(summary_headers):
     st(ws2, f"{col}3", hdr, fill=header_fill, font=white_bold)
 
 ref = "ADQ原始数据录入"
+group_view_range = f"B{start_row}:B{end_row}"
+group_cost_range = f"C{start_row}:C{end_row}"
+group_deal_range = f"D{start_row}:D{end_row}"
+group_click_range = f"F{start_row}:F{end_row}"
+group_order_range = f"G{start_row}:G{end_row}"
+group_paid_range = f"H{start_row}:H{end_row}"
+group_interact_range = f"I{start_row}:I{end_row}"
 formulas = [
     ("A", f"='{ref}'!A5", None, input_fill),
     ("B", f"='{ref}'!B5", None, input_fill),
     ("C", f"=TEXT('{ref}'!C5,\"HH:MM\")&\"-\"&TEXT('{ref}'!D5,\"HH:MM\")", None, input_fill),
     ("D", f"='{ref}'!E5", "0.0", input_fill),
-    ("E", f"=SUM('{ref}'!C:C)", "#,##0.00", green_light),
-    ("F", f"=SUM('{ref}'!D:D)", None, green_light),
+    ("E", f"=SUM('{ref}'!{group_cost_range})", "#,##0.00", green_light),
+    ("F", f"=SUM('{ref}'!{group_deal_range})", None, green_light),
     ("G", "=IFERROR(E4/F4,\"\")", "#,##0.00", green_light),
-    ("H", f"=SUM('{ref}'!B:B)", None, green_light),
+    ("H", f"=SUM('{ref}'!{group_view_range})", None, green_light),
     ("I", "=IFERROR(E4/H4,\"\")", "#,##0.00", green_light),
-    ("J", f"=SUM('{ref}'!F:F)", None, green_light),
+    ("J", f"=SUM('{ref}'!{group_click_range})", None, green_light),
     ("K", "=IFERROR(J4/H4,\"\")", "0.00%", green_light),
-    ("L", f"=SUM('{ref}'!G:G)", None, green_light),
-    ("M", f"=SUM('{ref}'!H:H)", None, green_light),
+    ("L", f"=SUM('{ref}'!{group_order_range})", None, green_light),
+    ("M", f"=SUM('{ref}'!{group_paid_range})", None, green_light),
     ("N", "=IFERROR(L4-M4,\"\")", None, pink_fill),
-    ("O", f"=SUM('{ref}'!I:I)", None, green_light),
+    ("O", f"=SUM('{ref}'!{group_interact_range})", None, green_light),
     ("P", "=IFERROR(F4/H4,\"\")", "0.00%", green_light),
     ("Q", "=IFERROR(F4/O4,\"\")", "0.00%", green_light),
 ]
@@ -215,6 +222,8 @@ for i, hdr in enumerate(group_summary_headers):
 
 summary_start = 4
 summary_end = summary_start + max_group_rows - 1
+ws3["N2"] = f"=SUM(C{summary_start}:C{summary_end})"
+ws3["O2"] = f"=SUM(D{summary_start}:D{summary_end})"
 for idx, r in enumerate(range(summary_start, summary_end + 1)):
     src = start_row + idx
     st(ws3, f"A{r}", f"=IF('{ref}'!A{src}=\"\",\"\",'{ref}'!A{src})", fill=input_fill)
@@ -227,8 +236,8 @@ for idx, r in enumerate(range(summary_start, summary_end + 1)):
     st(ws3, f"H{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!H{src})", fill=input_fill)
     st(ws3, f"I{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!I{src})", fill=input_fill)
     st(ws3, f"J{r}", f"=IFERROR(D{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
-    st(ws3, f"K{r}", f"=IFERROR(C{r}/SUM($C${summary_start}:$C${summary_end}),\"\")", fill=green_light, fmt="0.00%")
-    st(ws3, f"L{r}", f"=IFERROR(D{r}/SUM($D${summary_start}:$D${summary_end}),\"\")", fill=green_light, fmt="0.00%")
+    st(ws3, f"K{r}", f"=IFERROR(C{r}/$N$2,\"\")", fill=green_light, fmt="0.00%")
+    st(ws3, f"L{r}", f"=IFERROR(D{r}/$O$2,\"\")", fill=green_light, fmt="0.00%")
 
 # 总计行
 total_row = summary_end + 1
