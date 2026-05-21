@@ -2,7 +2,7 @@ import openpyxl
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-# 可扩展为任意数量投放组（每个dict即一组）
+# Supports any number of ad groups (one dict per group).
 ad_groups = [
     {
         "name": "投放组1",
@@ -233,6 +233,7 @@ for i, hdr in enumerate(headers3):
     st(ws3, f"{col}3", hdr, fill=header_fill, font=white_bold)
 
 summary_start = 4
+# Helper denominator cells for share formulas (cost/deals totals).
 ws3["N2"] = f"=SUM(C{summary_start}:C{summary_start + len(ad_groups) - 1})"
 ws3["O2"] = f"=SUM(D{summary_start}:D{summary_start + len(ad_groups) - 1})"
 for idx, g in enumerate(ad_groups):

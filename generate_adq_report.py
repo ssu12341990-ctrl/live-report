@@ -103,7 +103,7 @@ for i, field in enumerate(adq_headers):
     st(ws1, f"{col}8", field, fill=header_fill, font=white_bold)
 
 start_row = 9
-# 模板预置40行输入区，日常够用；若需要更多投放组可直接调大该值。
+# Preset 40 input rows for ad groups; increase this value if your team needs more.
 max_group_rows = 40
 end_row = start_row + max_group_rows - 1
 
@@ -223,6 +223,7 @@ for i, hdr in enumerate(group_summary_headers):
 
 summary_start = 4
 summary_end = summary_start + max_group_rows - 1
+# Helper denominator cells for share formulas (cost/deals totals).
 ws3["N2"] = f"=SUM(C{summary_start}:C{summary_end})"
 ws3["O2"] = f"=SUM(D{summary_start}:D{summary_end})"
 for idx, r in enumerate(range(summary_start, summary_end + 1)):
