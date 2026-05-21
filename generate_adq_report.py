@@ -5,65 +5,68 @@ from openpyxl.utils import get_column_letter
 wb = openpyxl.Workbook()
 
 # 样式定义
-title_fill   = PatternFill("solid", fgColor="1A3A6B")
-header_fill  = PatternFill("solid", fgColor="2F4F8F")
-green_light  = PatternFill("solid", fgColor="E2EFDA")
-yellow_fill  = PatternFill("solid", fgColor="FFF2CC")
-gray_fill    = PatternFill("solid", fgColor="F2F2F2")
-input_fill   = PatternFill("solid", fgColor="FFFDE7")
-orange_light = PatternFill("solid", fgColor="FAD7A0")
-blue_light   = PatternFill("solid", fgColor="AED6F1")
-pink_fill    = PatternFill("solid", fgColor="FFE0E0")
+title_fill = PatternFill("solid", fgColor="1A3A6B")
+header_fill = PatternFill("solid", fgColor="2F4F8F")
+green_light = PatternFill("solid", fgColor="E2EFDA")
+yellow_fill = PatternFill("solid", fgColor="FFF2CC")
+gray_fill = PatternFill("solid", fgColor="F2F2F2")
+input_fill = PatternFill("solid", fgColor="FFFDE7")
+pink_fill = PatternFill("solid", fgColor="FFE0E0")
 
-white_bold  = Font(bold=True, color="FFFFFF", size=11)
-dark_normal = Font(color="1F2D3D", size=10)
-
+white_bold = Font(bold=True, color="FFFFFF", size=11)
 center = Alignment(horizontal="center", vertical="center", wrap_text=True)
-left   = Alignment(horizontal="left",   vertical="center", wrap_text=True)
-thin   = Border(
+left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+thin = Border(
     left=Side(style="thin"), right=Side(style="thin"),
-    top=Side(style="thin"),  bottom=Side(style="thin"),
+    top=Side(style="thin"), bottom=Side(style="thin"),
 )
+
 
 def st(ws, cell, val=None, fill=None, font=None, align=center, border=thin, fmt=None):
     c = ws[cell]
-    if val is not None: c.value = val
-    c.fill      = fill if fill else PatternFill()
-    c.font      = font if font else Font(size=10, color="1F2D3D")
+    if val is not None:
+        c.value = val
+    c.fill = fill if fill else PatternFill()
+    c.font = font if font else Font(size=10, color="1F2D3D")
     c.alignment = align
-    c.border    = border
-    if fmt: c.number_format = fmt
+    c.border = border
+    if fmt:
+        c.number_format = fmt
     return c
 
+
 # ================================================
-# Sheet 1: ADQ 原始数据录入
+# Sheet 1: ADQ 原始数据录入（纵向多组）
 # ================================================
 ws1 = wb.active
 ws1.title = "ADQ原始数据录入"
 
 ws1.merge_cells("A1:P1")
-st(ws1, "A1", "ADQ 投放数据录入表", fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
+st(ws1, "A1", "ADQ 投放数据录入表（纵向多组）", fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
 ws1.row_dimensions[1].height = 36
 
 ws1.merge_cells("A2:P2")
-st(ws1, "A2", "说明：每次直播后将ADQ截图数据填入黄色单元格，绿色单元格自动计算",
-   fill=yellow_fill, font=Font(bold=True, color="7B3F00", size=10), align=left)
+st(
+    ws1,
+    "A2",
+    "说明：每个投放组占一行，可按需新增任意组；黄色单元格填写数据，绿色单元格自动计算。",
+    fill=yellow_fill,
+    font=Font(bold=True, color="7B3F00", size=10),
+    align=left,
+)
 ws1.row_dimensions[2].height = 20
 
-# 基本信息标题
 ws1.merge_cells("A3:P3")
 st(ws1, "A3", "基本信息", fill=header_fill, font=white_bold, align=left)
 ws1.row_dimensions[3].height = 22
 
-for col, hdr in zip(["A","B","C","D","E"], ["日期","主播","开播时间","结束时间","直播时长(h)"]):
+for col, hdr in zip(["A", "B", "C", "D", "E"], ["日期", "主播", "开播时间", "结束时间", "直播时长(h)"]):
     st(ws1, f"{col}4", hdr, fill=header_fill, font=white_bold)
-ws1.row_dimensions[4].height = 28
 
-for col in ["A","B","C","D"]:
+for col in ["A", "B", "C", "D"]:
     st(ws1, f"{col}5", fill=input_fill)
 ws1["C5"].number_format = "HH:MM"
 ws1["D5"].number_format = "HH:MM"
-# 直播时长自动计算
 ws1["E5"].value = "=(D5-C5)*24"
 ws1["E5"].number_format = "0.0"
 ws1["E5"].fill = green_light
@@ -72,178 +75,181 @@ ws1["E5"].alignment = center
 ws1["E5"].border = thin
 ws1.row_dimensions[5].height = 24
 
-# ADQ两组数据
-ws1.merge_cells("A7:H7")
-st(ws1, "A7", "投放组 1（ADQ左侧截图）",
-   fill=PatternFill("solid", fgColor="E67E22"), font=white_bold)
-ws1.merge_cells("I7:P7")
-st(ws1, "I7", "投放组 2（ADQ右侧截图）",
-   fill=PatternFill("solid", fgColor="2471A3"), font=white_bold)
-ws1.row_dimensions[7].height = 28
+ws1.merge_cells("A7:P7")
+st(ws1, "A7", "投放组纵向对比（每行一个投放组）", fill=header_fill, font=white_bold, align=left)
+ws1.row_dimensions[7].height = 26
 
-adq_fields = [
-    "观看人数", "花费(元)", "成交量", "转化目标成本(元)",
-    "商品点击", "提交订单", "支付成功", "互动人数",
+adq_headers = [
+    "投放组",
+    "观看人数",
+    "花费(元)",
+    "成交量",
+    "转化目标成本(元)",
+    "商品点击",
+    "提交订单",
+    "支付成功",
+    "互动人数",
+    "成本(元/单)",
+    "观看成本(元)",
+    "商品点击率",
+    "提交率",
+    "支付率",
+    "转化率",
+    "互动转化率",
 ]
-g1_cols = ["A","B","C","D","E","F","G","H"]
-g2_cols = ["I","J","K","L","M","N","O","P"]
 
-for col, field in zip(g1_cols, adq_fields):
-    st(ws1, f"{col}8", field, fill=orange_light, font=Font(bold=True, size=9, color="7B3F00"))
-    st(ws1, f"{col}9", fill=input_fill)
+for i, field in enumerate(adq_headers):
+    col = get_column_letter(i + 1)
+    st(ws1, f"{col}8", field, fill=header_fill, font=white_bold)
 
-for col, field in zip(g2_cols, adq_fields):
-    st(ws1, f"{col}8", field, fill=blue_light, font=Font(bold=True, size=9, color="1A5276"))
-    st(ws1, f"{col}9", fill=input_fill)
+start_row = 9
+max_group_rows = 40
+end_row = start_row + max_group_rows - 1
 
-ws1.row_dimensions[8].height = 32
-ws1.row_dimensions[9].height = 24
+for r in range(start_row, end_row + 1):
+    for col in "ABCDEFGHI":
+        st(ws1, f"{col}{r}", fill=input_fill)
 
-ws1.merge_cells("A10:P10")
-st(ws1, "A10", "互动人数 = 评论人数 + 喝彩人数（填ADQ截图互动数据合计）",
-   fill=gray_fill, font=Font(italic=True, size=9, color="666666"), align=left)
-ws1.row_dimensions[10].height = 18
+    st(ws1, f"J{r}", f"=IFERROR(C{r}/D{r},\"\")", fill=green_light, fmt="#,##0.00")
+    st(ws1, f"K{r}", f"=IFERROR(C{r}/B{r},\"\")", fill=green_light, fmt="#,##0.00")
+    st(ws1, f"L{r}", f"=IFERROR(F{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
+    st(ws1, f"M{r}", f"=IFERROR(G{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
+    st(ws1, f"N{r}", f"=IFERROR(H{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
+    st(ws1, f"O{r}", f"=IFERROR(D{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
+    st(ws1, f"P{r}", f"=IFERROR(D{r}/I{r},\"\")", fill=green_light, fmt="0.00%")
 
-for col in "ABCDEFGHIJKLMNOP":
-    ws1.column_dimensions[col].width = 14
+ws1.merge_cells(f"A{end_row + 2}:P{end_row + 2}")
+st(
+    ws1,
+    f"A{end_row + 2}",
+    "提示：可直接在下方插入新行并复制样式公式以继续扩展投放组。",
+    fill=gray_fill,
+    font=Font(italic=True, size=9, color="666666"),
+    align=left,
+)
+
+col_widths1 = [12, 10, 12, 10, 14, 10, 10, 10, 10, 12, 12, 10, 10, 10, 10, 12]
+for i, w in enumerate(col_widths1):
+    ws1.column_dimensions[get_column_letter(i + 1)].width = w
 
 ws1.freeze_panes = "A9"
 
 # ================================================
-# Sheet 2: 汇总统计表
+# Sheet 2: 汇总统计表（全组合计）
 # ================================================
 ws2 = wb.create_sheet("汇总统计表")
 
 ws2.merge_cells("A1:Q1")
-st(ws2, "A1", "直播 ADQ 投放汇总统计表",
-   fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
+st(ws2, "A1", "直播 ADQ 投放汇总统计表", fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
 ws2.row_dimensions[1].height = 36
 
 ws2.merge_cells("A2:Q2")
-st(ws2, "A2", "绿色单元格为自动汇总计算结果，数据来源于【ADQ原始数据录入】，无需手动填写",
-   fill=green_light, font=Font(bold=True, color="375623", size=10), align=left)
-ws2.row_dimensions[2].height = 20
+st(
+    ws2,
+    "A2",
+    "绿色单元格为自动计算，按【ADQ原始数据录入】中全部投放组自动汇总。",
+    fill=green_light,
+    font=Font(bold=True, color="375623", size=10),
+    align=left,
+)
 
 summary_headers = [
-    "日期","主播","时间","直播时长(h)",
-    "消耗(元)","成交量","成本(元/单)",
-    "场观(人)","观看成本(元)",
-    "商品点击","商品点击率",
-    "提交订单","支付成功","未支付",
-    "互动人数","转化率","互动转化率"
+    "日期", "主播", "时间", "直播时长(h)",
+    "总消耗(元)", "总成交量", "平均成本(元/单)",
+    "总场观(人)", "观看成本(元)",
+    "总商品点击", "商品点击率",
+    "总提交订单", "总支付成功", "未支付",
+    "总互动人数", "转化率", "互动转化率",
 ]
 for i, hdr in enumerate(summary_headers):
-    col = get_column_letter(i+1)
+    col = get_column_letter(i + 1)
     st(ws2, f"{col}3", hdr, fill=header_fill, font=white_bold)
-ws2.row_dimensions[3].height = 36
 
 ref = "ADQ原始数据录入"
-auto_cols = {"E","F","G","H","I","J","K","L","M","N","O","P","Q"}
 formulas = [
-    ("A", f"='{ref}'!A5",                                                            None,          input_fill),
-    ("B", f"='{ref}'!B5",                                                            None,          input_fill),
-    ("C", f"=TEXT('{ref}'!C5,\"HH:MM\")&\"-\"&TEXT('{ref}'!D5,\"HH:MM\")",          None,          input_fill),
-    ("D", f"='{ref}'!E5",                                                            "0.0",         input_fill),
-    ("E", f"='{ref}'!B9+'{ref}'!J9",                                                 "#,##0.00",    green_light),
-    ("F", f"='{ref}'!C9+'{ref}'!K9",                                                 None,          green_light),
-    ("G", f"=IFERROR(E4/F4,\"\")",                                                   "#,##0.00",    green_light),
-    ("H", f"='{ref}'!A9+'{ref}'!I9",                                                 None,          green_light),
-    ("I", f"=IFERROR(E4/H4,\"\")",                                                   "#,##0.00",    green_light),
-    ("J", f"='{ref}'!E9+'{ref}'!M9",                                                 None,          green_light),
-    ("K", f"=IFERROR(J4/H4,\"\")",                                                   "0.00%",       green_light),
-    ("L", f"='{ref}'!F9+'{ref}'!N9",                                                 None,          green_light),
-    ("M", f"='{ref}'!G9+'{ref}'!O9",                                                 None,          green_light),
-    ("N", f"=IFERROR(L4-M4,\"\")",                                                   None,          pink_fill),
-    ("O", f"='{ref}'!H9+'{ref}'!P9",                                                 None,          green_light),
-    ("P", f"=IFERROR(F4/H4,\"\")",                                                   "0.00%",       green_light),
-    ("Q", f"=IFERROR(F4/O4,\"\")",                                                   "0.00%",       green_light),
+    ("A", f"='{ref}'!A5", None, input_fill),
+    ("B", f"='{ref}'!B5", None, input_fill),
+    ("C", f"=TEXT('{ref}'!C5,\"HH:MM\")&\"-\"&TEXT('{ref}'!D5,\"HH:MM\")", None, input_fill),
+    ("D", f"='{ref}'!E5", "0.0", input_fill),
+    ("E", f"=SUM('{ref}'!C:C)", "#,##0.00", green_light),
+    ("F", f"=SUM('{ref}'!D:D)", None, green_light),
+    ("G", "=IFERROR(E4/F4,\"\")", "#,##0.00", green_light),
+    ("H", f"=SUM('{ref}'!B:B)", None, green_light),
+    ("I", "=IFERROR(E4/H4,\"\")", "#,##0.00", green_light),
+    ("J", f"=SUM('{ref}'!F:F)", None, green_light),
+    ("K", "=IFERROR(J4/H4,\"\")", "0.00%", green_light),
+    ("L", f"=SUM('{ref}'!G:G)", None, green_light),
+    ("M", f"=SUM('{ref}'!H:H)", None, green_light),
+    ("N", "=IFERROR(L4-M4,\"\")", None, pink_fill),
+    ("O", f"=SUM('{ref}'!I:I)", None, green_light),
+    ("P", "=IFERROR(F4/H4,\"\")", "0.00%", green_light),
+    ("Q", "=IFERROR(F4/O4,\"\")", "0.00%", green_light),
 ]
 for col, formula, fmt, fill in formulas:
     st(ws2, f"{col}4", formula, fill=fill, fmt=fmt)
-ws2.row_dimensions[4].height = 24
 
-# 字段说明
-ws2.merge_cells("A6:Q6")
-st(ws2, "A6", "字段说明", fill=header_fill, font=white_bold, align=left)
-ws2.row_dimensions[6].height = 22
-
-legend_data = [
-    ("消耗(元)",     "组1花费 + 组2花费",                              gray_fill),
-    ("成交量",       "组1成交量 + 组2成交量",                          gray_fill),
-    ("成本(元/单)",  "消耗 / 成交量，每单获客成本",                    yellow_fill),
-    ("场观(人)",     "组1观看人数 + 组2观看人数",                       gray_fill),
-    ("观看成本",     "消耗 / 场观人数",                                yellow_fill),
-    ("商品点击率",   "商品点击 / 场观人数",                             yellow_fill),
-    ("未支付",       "提交订单 - 支付成功",                             pink_fill),
-    ("转化率",       "成交量 / 场观人数，反映整体转化效率",              green_light),
-    ("互动转化率",   "成交量 / 互动人数，反映互动后成交效率",            green_light),
-]
-for j, (term, desc, bg) in enumerate(legend_data):
-    r = 7 + j
-    ws2.merge_cells(f"A{r}:D{r}")
-    ws2.merge_cells(f"E{r}:Q{r}")
-    c1 = ws2[f"A{r}"]
-    c1.value = term; c1.font = Font(bold=True, size=10); c1.fill = bg
-    c1.alignment = left; c1.border = thin
-    c2 = ws2[f"E{r}"]
-    c2.value = desc; c2.font = Font(size=10, color="444444"); c2.fill = bg
-    c2.alignment = left; c2.border = thin
-    ws2.row_dimensions[r].height = 20
-
-col_widths2 = [12,10,16,12,13,10,13,10,13,10,12,10,10,10,10,10,12]
+col_widths2 = [12, 10, 16, 12, 13, 10, 13, 10, 13, 12, 12, 12, 12, 10, 12, 10, 12]
 for i, w in enumerate(col_widths2):
-    ws2.column_dimensions[get_column_letter(i+1)].width = w
+    ws2.column_dimensions[get_column_letter(i + 1)].width = w
 ws2.freeze_panes = "A4"
 
 # ================================================
-# Sheet 3: 示例数据（2024/5/21）
+# Sheet 3: 投放组汇总（新增）
 # ================================================
-ws3 = wb.create_sheet("示例-20240521")
+ws3 = wb.create_sheet("投放组汇总")
 
-ws3.merge_cells("A1:Q1")
-st(ws3, "A1", "示例：2024/5/21 王雨琪 8:00-10:30（根据ADQ截图真实数据）",
-   fill=PatternFill("solid", fgColor="E67E22"), font=white_bold)
-ws3.row_dimensions[1].height = 30
+ws3.merge_cells("A1:L1")
+st(ws3, "A1", "投放组对比汇总（纵向）", fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
+ws3.row_dimensions[1].height = 32
 
-for i, hdr in enumerate(summary_headers):
-    col = get_column_letter(i+1)
-    st(ws3, f"{col}2", hdr, fill=header_fill, font=white_bold)
-ws3.row_dimensions[2].height = 36
+ws3.merge_cells("A2:L2")
+st(ws3, "A2", "按投放组逐行展示，并自动计算占比和关键转化指标。", fill=yellow_fill, font=Font(bold=True, color="7B3F00", size=10), align=left)
 
-# 组1: 观看91, 花费1732.02, 成交6, 商品点击24, 提交订单8, 支付6, 互动8
-# 组2: 观看361, 花费8459.93, 成交36, 商品点击106, 提交订单43, 支付35, 互动28
-g1v=91;  g1f=1732.02; g1d=6;  g1c=24;  g1s=8;  g1p=6;  g1i=8
-g2v=361; g2f=8459.93; g2d=36; g2c=106; g2s=43; g2p=35; g2i=28
-
-tf=g1f+g2f; td=g1d+g2d; tv=g1v+g2v
-tc=g1c+g2c; ts=g1s+g2s; tp=g1p+g2p; ti=g1i+g2i
-
-example_vals = [
-    ("A", "2024/5/21",           "YYYY/M/D",  input_fill),
-    ("B", "王雨琪",               None,         input_fill),
-    ("C", "8:00-10:30",           None,         input_fill),
-    ("D", 2.5,                    "0.0",        input_fill),
-    ("E", tf,                     "#,##0.00",   green_light),
-    ("F", td,                     None,         green_light),
-    ("G", round(tf/td, 2),        "#,##0.00",   green_light),
-    ("H", tv,                     None,         green_light),
-    ("I", round(tf/tv, 2),        "#,##0.00",   green_light),
-    ("J", tc,                     None,         green_light),
-    ("K", tc/tv,                  "0.00%",      green_light),
-    ("L", ts,                     None,         green_light),
-    ("M", tp,                     None,         green_light),
-    ("N", ts-tp,                  None,         pink_fill),
-    ("O", ti,                     None,         green_light),
-    ("P", td/tv,                  "0.00%",      green_light),
-    ("Q", td/ti,                  "0.00%",      green_light),
+group_summary_headers = [
+    "投放组", "观看人数", "花费(元)", "成交量", "成本(元/单)",
+    "商品点击", "提交订单", "支付成功", "互动人数", "转化率", "消耗占比", "成交占比",
 ]
-for col, val, fmt, fill in example_vals:
-    st(ws3, f"{col}3", val, fill=fill, fmt=fmt)
-ws3.row_dimensions[3].height = 24
+for i, hdr in enumerate(group_summary_headers):
+    col = get_column_letter(i + 1)
+    st(ws3, f"{col}3", hdr, fill=header_fill, font=white_bold)
 
-for i, w in enumerate(col_widths2):
-    ws3.column_dimensions[get_column_letter(i+1)].width = w
-ws3.freeze_panes = "A3"
+summary_start = 4
+summary_end = summary_start + max_group_rows - 1
+for idx, r in enumerate(range(summary_start, summary_end + 1)):
+    src = start_row + idx
+    st(ws3, f"A{r}", f"=IF('{ref}'!A{src}=\"\",\"\",'{ref}'!A{src})", fill=input_fill)
+    st(ws3, f"B{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!B{src})", fill=input_fill)
+    st(ws3, f"C{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!C{src})", fill=input_fill, fmt="#,##0.00")
+    st(ws3, f"D{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!D{src})", fill=input_fill)
+    st(ws3, f"E{r}", f"=IFERROR(C{r}/D{r},\"\")", fill=green_light, fmt="#,##0.00")
+    st(ws3, f"F{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!F{src})", fill=input_fill)
+    st(ws3, f"G{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!G{src})", fill=input_fill)
+    st(ws3, f"H{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!H{src})", fill=input_fill)
+    st(ws3, f"I{r}", f"=IF($A{r}=\"\",\"\",'{ref}'!I{src})", fill=input_fill)
+    st(ws3, f"J{r}", f"=IFERROR(D{r}/B{r},\"\")", fill=green_light, fmt="0.00%")
+    st(ws3, f"K{r}", f"=IFERROR(C{r}/SUM($C${summary_start}:$C${summary_end}),\"\")", fill=green_light, fmt="0.00%")
+    st(ws3, f"L{r}", f"=IFERROR(D{r}/SUM($D${summary_start}:$D${summary_end}),\"\")", fill=green_light, fmt="0.00%")
+
+# 总计行
+total_row = summary_end + 1
+st(ws3, f"A{total_row}", "合计", fill=header_fill, font=white_bold)
+st(ws3, f"B{total_row}", f"=SUM(B{summary_start}:B{summary_end})", fill=green_light)
+st(ws3, f"C{total_row}", f"=SUM(C{summary_start}:C{summary_end})", fill=green_light, fmt="#,##0.00")
+st(ws3, f"D{total_row}", f"=SUM(D{summary_start}:D{summary_end})", fill=green_light)
+st(ws3, f"E{total_row}", f"=IFERROR(C{total_row}/D{total_row},\"\")", fill=green_light, fmt="#,##0.00")
+st(ws3, f"F{total_row}", f"=SUM(F{summary_start}:F{summary_end})", fill=green_light)
+st(ws3, f"G{total_row}", f"=SUM(G{summary_start}:G{summary_end})", fill=green_light)
+st(ws3, f"H{total_row}", f"=SUM(H{summary_start}:H{summary_end})", fill=green_light)
+st(ws3, f"I{total_row}", f"=SUM(I{summary_start}:I{summary_end})", fill=green_light)
+st(ws3, f"J{total_row}", f"=IFERROR(D{total_row}/B{total_row},\"\")", fill=green_light, fmt="0.00%")
+st(ws3, f"K{total_row}", "=1", fill=green_light, fmt="0.00%")
+st(ws3, f"L{total_row}", "=1", fill=green_light, fmt="0.00%")
+
+col_widths3 = [12, 10, 12, 10, 12, 10, 10, 10, 10, 10, 10, 10]
+for i, w in enumerate(col_widths3):
+    ws3.column_dimensions[get_column_letter(i + 1)].width = w
+
+ws3.freeze_panes = "A4"
 
 wb.save("ADQ直播数据统计模板.xlsx")
 print("已生成：ADQ直播数据统计模板.xlsx")
