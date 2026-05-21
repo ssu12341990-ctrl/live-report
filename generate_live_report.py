@@ -5,10 +5,12 @@ wb = openpyxl.Workbook()
 ws = wb.active
 ws.title = "直播数据统计"
 
+# 样式定义
 header_fill  = PatternFill("solid", fgColor="2F4F8F")
 yellow_fill  = PatternFill("solid", fgColor="FFF2CC")
 green_fill   = PatternFill("solid", fgColor="E2EFDA")
-red_fill     = PatternFill("solid", fgColor="FFE0E0")
+pink_fill    = PatternFill("solid", fgColor="FFE0E0")
+gray_fill    = PatternFill("solid", fgColor="F2F2F2")
 white_bold   = Font(bold=True, color="FFFFFF", size=11)
 dark_bold    = Font(bold=True, color="1F2D3D", size=10)
 dark_normal  = Font(color="1F2D3D", size=10)
@@ -20,6 +22,7 @@ thin_border = Border(
     top=Side(style="thin"),   bottom=Side(style="thin"),
 )
 
+# 第1行：标题
 ws.merge_cells("A1:R1")
 ws["A1"] = "直播间数据统计报告（修正版）"
 ws["A1"].font      = Font(bold=True, color="FFFFFF", size=14)
@@ -27,6 +30,7 @@ ws["A1"].fill      = PatternFill("solid", fgColor="1A3A6B")
 ws["A1"].alignment = center
 ws.row_dimensions[1].height = 36
 
+# 第2行：修正说明
 ws.merge_cells("A2:R2")
 ws["A2"] = "修正说明：① 原[场观roi/总ROI]实为转化率，已重命名；② 新增[成交金额]与[真实ROI(成交额/消耗)]列"
 ws["A2"].font      = Font(bold=True, color="C00000", size=10)
@@ -34,6 +38,7 @@ ws["A2"].fill      = PatternFill("solid", fgColor="FFF2CC")
 ws["A2"].alignment = left
 ws.row_dimensions[2].height = 22
 
+# 第3行：列头
 headers = [
     ("A", "日期",                   header_fill, white_bold),
     ("B", "时间",                   header_fill, white_bold),
@@ -63,6 +68,7 @@ for col, title, fill, font in headers:
     c.border    = thin_border
 ws.row_dimensions[3].height = 40
 
+# 数据行
 rows = [
     {
         "日期": "2024/5/21", "时间": "8:00-10:30", "时长": 2.5, "主播": "王雨琪",
@@ -111,36 +117,45 @@ for i, d in enumerate(rows):
             c.value = val
             if fmt: c.number_format = fmt
 
+# 列宽
 for col, w in zip("ABCDEFGHIJKLMNOPQR",
                   [10,13,8,10,9,9,13,13,10,10,14,9,9,16,12,13,18,18]):
     ws.column_dimensions[col].width = w
 ws.freeze_panes = "A4"
 
+# 字段说明区 —— 纯文字，无Emoji，无特殊符号，只用颜色区分
 lr = ROW_START + len(rows) + 2
 ws.merge_cells(f"A{lr}:R{lr}")
-ws[f"A{lr}"] = "【字段说明】"
-ws[f"A{lr}"].font      = Font(bold=True, size=11, color="1A3A6B")
+ws[f"A{lr}"] = "字段说明"
+ws[f"A{lr}"].font      = Font(bold=True, size=11, color="FFFFFF")
+ws[f"A{lr}"].fill      = PatternFill("solid", fgColor="1A3A6B")
 ws[f"A{lr}"].alignment = left
+ws.row_dimensions[lr].height = 22
 
-# 图例：用纯文字替代Emoji，避免Excel报#NAME?错误
+# 注意：说明文字全部用普通符号，不含 ÷ / 特殊数学符号
 legends = [
-    ("【绿】转化率（修正前称roi）", "= 该渠道成交单数 ÷ 该渠道场观人数，反映流量转化效率",        green_fill),
-    ("【黄】真实ROI",               "= 累计成交金额 ÷ 广告消耗，>100% 才回本，本场仅 4.56%，严重亏损", yellow_fill),
-    ("【灰】单位成本",               "= 广告消耗 ÷ 总成交单数，即每单获客成本 ¥216.85",             None),
-    ("【红】本场结论",               "成交 ¥465.30 / 消耗 ¥10191.95，建议复盘投放策略与商品定价",    PatternFill("solid", fgColor="FFE0E0")),
+    ("转化率（修正前称roi）", "计算方式：该渠道成交单数 / 该渠道场观人数，反映流量转化效率",         green_fill),
+    ("真实ROI",               "计算方式：累计成交金额 / 广告消耗，大于100%才回本，本场仅4.56%亏损",  yellow_fill),
+    ("单位成本",               "计算方式：广告消耗 / 总成交单数，即每单获客成本216.85元",             gray_fill),
+    ("本场结论",               "成交465.30元 / 消耗10191.95元，建议复盘投放策略与商品定价",           pink_fill),
 ]
 for j, (term, desc, bg) in enumerate(legends):
     row_n = lr + 1 + j
+    ws.row_dimensions[row_n].height = 20
     ws.merge_cells(f"A{row_n}:D{row_n}")
     ws.merge_cells(f"E{row_n}:R{row_n}")
-    ws[f"A{row_n}"].value     = term
-    ws[f"A{row_n}"].font      = Font(bold=True, size=10)
-    ws[f"A{row_n}"].alignment = left
-    if bg: ws[f"A{row_n}"].fill = bg
-    ws[f"E{row_n}"].value     = desc
-    ws[f"E{row_n}"].font      = Font(size=10, color="444444")
-    ws[f"E{row_n}"].alignment = left
-    if bg: ws[f"E{row_n}"].fill = bg
+    c_term = ws[f"A{row_n}"]
+    c_term.value     = term
+    c_term.font      = Font(bold=True, size=10, color="1F2D3D")
+    c_term.alignment = left
+    c_term.fill      = bg
+    c_term.border    = thin_border
+    c_desc = ws[f"E{row_n}"]
+    c_desc.value     = desc
+    c_desc.font      = Font(size=10, color="333333")
+    c_desc.alignment = left
+    c_desc.fill      = bg
+    c_desc.border    = thin_border
 
 wb.save("直播数据统计_修正版.xlsx")
 print("已生成：直播数据统计_修正版.xlsx")
