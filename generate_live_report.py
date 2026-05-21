@@ -8,6 +8,7 @@ ws.title = "直播数据统计"
 header_fill  = PatternFill("solid", fgColor="2F4F8F")
 yellow_fill  = PatternFill("solid", fgColor="FFF2CC")
 green_fill   = PatternFill("solid", fgColor="E2EFDA")
+red_fill     = PatternFill("solid", fgColor="FFE0E0")
 white_bold   = Font(bold=True, color="FFFFFF", size=11)
 dark_bold    = Font(bold=True, color="1F2D3D", size=10)
 dark_normal  = Font(color="1F2D3D", size=10)
@@ -117,26 +118,29 @@ ws.freeze_panes = "A4"
 
 lr = ROW_START + len(rows) + 2
 ws.merge_cells(f"A{lr}:R{lr}")
-ws[f"A{lr}"] = "📌 字段说明"
+ws[f"A{lr}"] = "【字段说明】"
 ws[f"A{lr}"].font      = Font(bold=True, size=11, color="1A3A6B")
 ws[f"A{lr}"].alignment = left
 
+# 图例：用纯文字替代Emoji，避免Excel报#NAME?错误
 legends = [
-    ("🟢 转化率（修正前称roi）", "= 该渠道成交单数 ÷ 该渠道场观人数，反映流量转化效率"),
-    ("🟡 真实ROI",               "= 累计成交金额 ÷ 广告消耗，>100% 才回本，本场仅 4.56%，严重亏损"),
-    ("⚪ 单位成本",               "= 广告消耗 ÷ 总成交单数，即每单获客成本 ¥216.85"),
-    ("🔴 本场结论",              "成交 ¥465.30 / 消耗 ¥10191.95，建议复盘投放策略与商品定价"),
+    ("【绿】转化率（修正前称roi）", "= 该渠道成交单数 ÷ 该渠道场观人数，反映流量转化效率",        green_fill),
+    ("【黄】真实ROI",               "= 累计成交金额 ÷ 广告消耗，>100% 才回本，本场仅 4.56%，严重亏损", yellow_fill),
+    ("【灰】单位成本",               "= 广告消耗 ÷ 总成交单数，即每单获客成本 ¥216.85",             None),
+    ("【红】本场结论",               "成交 ¥465.30 / 消耗 ¥10191.95，建议复盘投放策略与商品定价",    PatternFill("solid", fgColor="FFE0E0")),
 ]
-for j, (term, desc) in enumerate(legends):
+for j, (term, desc, bg) in enumerate(legends):
     row_n = lr + 1 + j
     ws.merge_cells(f"A{row_n}:D{row_n}")
     ws.merge_cells(f"E{row_n}:R{row_n}")
     ws[f"A{row_n}"].value     = term
     ws[f"A{row_n}"].font      = Font(bold=True, size=10)
     ws[f"A{row_n}"].alignment = left
+    if bg: ws[f"A{row_n}"].fill = bg
     ws[f"E{row_n}"].value     = desc
     ws[f"E{row_n}"].font      = Font(size=10, color="444444")
     ws[f"E{row_n}"].alignment = left
+    if bg: ws[f"E{row_n}"].fill = bg
 
 wb.save("直播数据统计_修正版.xlsx")
-print("✅ 已生成：直播数据统计_修正版.xlsx")
+print("已生成：直播数据统计_修正版.xlsx")
