@@ -103,6 +103,7 @@ for i, field in enumerate(adq_headers):
     st(ws1, f"{col}8", field, fill=header_fill, font=white_bold)
 
 start_row = 9
+# 模板预置40行输入区，日常够用；若需要更多投放组可直接调大该值。
 max_group_rows = 40
 end_row = start_row + max_group_rows - 1
 
