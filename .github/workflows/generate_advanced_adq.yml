@@ -1,0 +1,32 @@
+name: 生成ADQ高级投流分析Excel
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: pip install openpyxl
+
+      - name: 生成高级ADQ投流分析Excel
+        run: python generate_advanced_adq_report.py
+
+      - name: 上传高级ADQ分析Excel
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADQ高级投流分析_已填数据
+          path: ADQ高级投流分析_已填数据.xlsx
+          retention-days: 30
