@@ -2,7 +2,27 @@ import openpyxl
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from adq_input_loader import load_adq_rows
+
+INPUT_FILE = "data/adq_input_template.xlsx"
+
 wb = openpyxl.Workbook()
+rows = load_adq_rows(INPUT_FILE)
+primary_session = rows[0]["场次ID"]
+session_rows = [row for row in rows if row["场次ID"] == primary_session] or rows
+group1 = session_rows[0]
+group2 = session_rows[1] if len(session_rows) > 1 else {
+    **group1,
+    "投流组名": "投放组 2",
+    "观看人数": 0.0,
+    "花费(元)": 0.0,
+    "成交量": 0.0,
+    "转化目标成本(元)": 0.0,
+    "商品点击": 0.0,
+    "提交订单": 0.0,
+    "支付成功": 0.0,
+    "互动人数": 0.0,
+}
 
 # 样式定义
 title_fill   = PatternFill("solid", fgColor="1A3A6B")
@@ -55,13 +75,13 @@ ws1.row_dimensions[3].height = 22
 for col, hdr in zip(["A","B","C","D","E"], ["日期","主播","开播时间","结束时间","直播时长(h)"]):
     st(ws1, f"{col}4", hdr, fill=header_fill, font=white_bold)
 
-st(ws1, "A5", "2026/5/21", fill=input_fill)
-st(ws1, "B5", "王雨琪", fill=input_fill)
-st(ws1, "C5", "08:01", fill=input_fill)
-st(ws1, "D5", "10:30", fill=input_fill)
+st(ws1, "A5", group1["日期"], fill=input_fill)
+st(ws1, "B5", group1["主播"], fill=input_fill)
+st(ws1, "C5", group1["开播时间"], fill=input_fill)
+st(ws1, "D5", group1["结束时间"], fill=input_fill)
 ws1["C5"].number_format = "@"
 ws1["D5"].number_format = "@"
-ws1["E5"].value = "=2.5"
+ws1["E5"].value = group1["直播时长(h)"]
 ws1["E5"].number_format = "0.0"
 ws1["E5"].fill = green_light
 ws1["E5"].font = Font(size=10, color="375623")
@@ -69,9 +89,9 @@ ws1["E5"].alignment = center
 ws1["E5"].border = thin
 
 ws1.merge_cells("A7:H7")
-st(ws1, "A7", "投放组 1（左侧截图）", fill=PatternFill("solid", fgColor="E67E22"), font=white_bold)
+st(ws1, "A7", f"{group1['投流组名']}（组1）", fill=PatternFill("solid", fgColor="E67E22"), font=white_bold)
 ws1.merge_cells("I7:P7")
-st(ws1, "I7", "投放组 2（右侧截图）", fill=PatternFill("solid", fgColor="2471A3"), font=white_bold)
+st(ws1, "I7", f"{group2['投流组名']}（组2）", fill=PatternFill("solid", fgColor="2471A3"), font=white_bold)
 
 fields = ["观看人数", "花费(元)", "成交量", "转化目标成本(元)", "商品点击", "提交订单", "支付成功", "互动人数"]
 g1_cols = ["A","B","C","D","E","F","G","H"]
@@ -82,9 +102,27 @@ for col, field in zip(g1_cols, fields):
 for col, field in zip(g2_cols, fields):
     st(ws1, f"{col}8", field, fill=blue_light, font=Font(bold=True, size=9, color="1A5276"))
 
-# 根据截图自动填入的数据
-left_values = [91, 1732.02, 6, 288.67, 24, 8, 6, 8]
-right_values = [361, 8459.93, 36, 235.00, 106, 43, 35, 28]
+# 根据输入模板自动填入的数据
+left_values = [
+    group1["观看人数"],
+    group1["花费(元)"],
+    group1["成交量"],
+    group1["转化目标成本(元)"],
+    group1["商品点击"],
+    group1["提交订单"],
+    group1["支付成功"],
+    group1["互动人数"],
+]
+right_values = [
+    group2["观看人数"],
+    group2["花费(元)"],
+    group2["成交量"],
+    group2["转化目标成本(元)"],
+    group2["商品点击"],
+    group2["提交订单"],
+    group2["支付成功"],
+    group2["互动人数"],
+]
 
 for col, val in zip(g1_cols, left_values):
     st(ws1, f"{col}9", val, fill=input_fill)
@@ -92,7 +130,7 @@ for col, val in zip(g2_cols, right_values):
     st(ws1, f"{col}9", val, fill=input_fill)
 
 ws1.merge_cells("A10:P10")
-st(ws1, "A10", "互动人数按截图中的评论人数填写；本文件已按本次截图自动填入。",
+st(ws1, "A10", f"输入来源：{INPUT_FILE}；互动人数按截图中的评论人数填写。",
    fill=gray_fill, font=Font(italic=True, size=9, color="666666"), align=left)
 
 for col in "ABCDEFGHIJKLMNOP":
@@ -147,8 +185,26 @@ ws3.merge_cells("A1:H1")
 st(ws3, "A1", "本次截图识别结果", fill=title_fill, font=Font(bold=True, color="FFFFFF", size=14))
 rows = [
     ["组别", "观看人数", "花费", "成交量", "目标成本", "商品点击", "提交订单", "支付成功/互动人数"],
-    ["左侧", 91, 1732.02, 6, 288.67, 24, 8, "6 / 8"],
-    ["右侧", 361, 8459.93, 36, 235.00, 106, 43, "35 / 28"],
+    [
+        group1["投流组名"],
+        group1["观看人数"],
+        group1["花费(元)"],
+        group1["成交量"],
+        group1["转化目标成本(元)"],
+        group1["商品点击"],
+        group1["提交订单"],
+        f"{int(group1['支付成功'])} / {int(group1['互动人数'])}",
+    ],
+    [
+        group2["投流组名"],
+        group2["观看人数"],
+        group2["花费(元)"],
+        group2["成交量"],
+        group2["转化目标成本(元)"],
+        group2["商品点击"],
+        group2["提交订单"],
+        f"{int(group2['支付成功'])} / {int(group2['互动人数'])}",
+    ],
 ]
 for r_idx, row in enumerate(rows, start=2):
     for c_idx, val in enumerate(row, start=1):
