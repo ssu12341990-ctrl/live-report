@@ -1,0 +1,7 @@
+*.pyc
+__pycache__/
+
+直播数据统计_修正版.xlsx
+ADQ直播数据统计模板.xlsx
+ADQ直播数据统计_已填数据.xlsx
+ADQ高级投流分析_已填数据.xlsx

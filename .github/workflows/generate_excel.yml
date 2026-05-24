@@ -21,11 +21,17 @@ jobs:
       - name: 安装依赖
         run: pip install openpyxl
 
+      - name: 检查共享输入模板
+        run: test -f data/adq_input_template.xlsx
+
       - name: 运行直播报表脚本
         run: python generate_live_report.py
 
       - name: 运行已填数据版ADQ脚本
         run: python generate_filled_adq.py
+
+      - name: 运行高级版ADQ脚本
+        run: python generate_advanced_adq_report.py
 
       - name: 上传直播Excel
         uses: actions/upload-artifact@v4
@@ -39,4 +45,11 @@ jobs:
         with:
           name: ADQ直播数据统计_已填数据
           path: ADQ直播数据统计_已填数据.xlsx
+          retention-days: 30
+
+      - name: 上传高级版ADQ Excel
+        uses: actions/upload-artifact@v4
+        with:
+          name: ADQ高级投流分析_已填数据
+          path: ADQ高级投流分析_已填数据.xlsx
           retention-days: 30

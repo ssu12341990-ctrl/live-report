@@ -196,12 +196,12 @@ for i, w in enumerate(col_widths2):
 ws2.freeze_panes = "A4"
 
 # ================================================
-# Sheet 3: 示例数据（2024/5/21）
+# Sheet 3: 示例数据（占位）
 # ================================================
 ws3 = wb.create_sheet("示例-20240521")
 
 ws3.merge_cells("A1:Q1")
-st(ws3, "A1", "示例：2024/5/21 王雨琪 8:00-10:30（根据ADQ截图真实数据）",
+st(ws3, "A1", "示例：请将本行替换为本次上传输入后的汇总结果",
    fill=PatternFill("solid", fgColor="E67E22"), font=white_bold)
 ws3.row_dimensions[1].height = 30
 
@@ -210,32 +210,27 @@ for i, hdr in enumerate(summary_headers):
     st(ws3, f"{col}2", hdr, fill=header_fill, font=white_bold)
 ws3.row_dimensions[2].height = 36
 
-# 组1: 观看91, 花费1732.02, 成交6, 商品点击24, 提交订单8, 支付6, 互动8
-# 组2: 观看361, 花费8459.93, 成交36, 商品点击106, 提交订单43, 支付35, 互动28
-g1v=91;  g1f=1732.02; g1d=6;  g1c=24;  g1s=8;  g1p=6;  g1i=8
-g2v=361; g2f=8459.93; g2d=36; g2c=106; g2s=43; g2p=35; g2i=28
-
-tf=g1f+g2f; td=g1d+g2d; tv=g1v+g2v
-tc=g1c+g2c; ts=g1s+g2s; tp=g1p+g2p; ti=g1i+g2i
+tf=0; td=0; tv=0
+tc=0; ts=0; tp=0; ti=0
 
 example_vals = [
-    ("A", "2024/5/21",           "YYYY/M/D",  input_fill),
-    ("B", "王雨琪",               None,         input_fill),
-    ("C", "8:00-10:30",           None,         input_fill),
+    ("A", "YYYY/MM/DD",           None,         input_fill),
+    ("B", "主播名",               None,         input_fill),
+    ("C", "08:00-10:30",           None,         input_fill),
     ("D", 2.5,                    "0.0",        input_fill),
     ("E", tf,                     "#,##0.00",   green_light),
     ("F", td,                     None,         green_light),
-    ("G", round(tf/td, 2),        "#,##0.00",   green_light),
+    ("G", round(tf/td, 2) if td else "",        "#,##0.00",   green_light),
     ("H", tv,                     None,         green_light),
-    ("I", round(tf/tv, 2),        "#,##0.00",   green_light),
+    ("I", round(tf/tv, 2) if tv else "",        "#,##0.00",   green_light),
     ("J", tc,                     None,         green_light),
-    ("K", tc/tv,                  "0.00%",      green_light),
+    ("K", tc/tv if tv else "",                  "0.00%",      green_light),
     ("L", ts,                     None,         green_light),
     ("M", tp,                     None,         green_light),
     ("N", ts-tp,                  None,         pink_fill),
     ("O", ti,                     None,         green_light),
-    ("P", td/tv,                  "0.00%",      green_light),
-    ("Q", td/ti,                  "0.00%",      green_light),
+    ("P", td/tv if tv else "",                  "0.00%",      green_light),
+    ("Q", td/ti if ti else "",                  "0.00%",      green_light),
 ]
 for col, val, fmt, fill in example_vals:
     st(ws3, f"{col}3", val, fill=fill, fmt=fmt)
